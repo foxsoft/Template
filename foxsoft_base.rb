@@ -1,18 +1,16 @@
-NAME = @app_path.split('/').last.downcase
-
 run "rm README"
 
 run "rm config/database.yml"
 file "config/database.yml", <<-END
 development:
   adapter: postgresql
-  database: #{NAME}-dev
+  database: #{app_name}-dev
 test:
   adapter: postgresql
-  database: #{NAME}-test
+  database: #{app_name}-test
 production:
   adapter: postgresql
-  database: #{NAME}
+  database: #{app_name}
 END
 run "cp config/database.yml config/database.yml.example"
 
@@ -21,7 +19,11 @@ file "Gemfile", <<-END
 source 'http://rubygems.org'
 gem 'rails', '3.0.4'
 gem 'pg', '~> 0.10.0'
-gem 'haml', '~> 3.0.0'
+gem 'haml', '~> 3.0.25'
+gem 'haml-rails'
+gem 'compass', '~> 0.10.6'
+gem 'html5-boilerplate', '~> 0.3.0'
+gem 'barista', '~> 1.0.0'
 gem 'seed-fu', '~> 2.0.0'
 gem 'devise', '~> 1.1'
 gem 'cancan', '~> 1.5.0'
@@ -35,9 +37,9 @@ group :test do
 end
 
 END
-run 'bundle'
 
 generate("jquery:install --ui")
+generate("barista:install")
 
 file "lib/tasks/test_seed_data.rake", <<-END
 namespace :db do
@@ -52,31 +54,32 @@ END
 run "rm public/index.html"
 run "rm app/views/layouts/application.html.erb"
 
-run "wget -O public/stylesheets/reset.css http://meyerweb.com/eric/tools/css/reset/reset.css"
+create_file "log/.gitkeep"
+create_file "tmp/.gitkeep"
 
-file "app/views/layouts/application.html.erb", <<-END
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>#{NAME}</title>
-    <%= stylesheet_link_tag "reset" %>
-    <%= javascript_include_tag "//ajax.googleapis.com/ajax/libs/jquery/1.5.0/jquery.min.js" %>
-    <script type="text/javascript">
-    if (typeof jQuery == 'undefined')
-    {
-        document.write(unescape("%3Cscript src='/javascripts/jquery.min.js' type='text/javascript'%3E%3C/script%3E"));
-    }
-    </script>
-    <%= javascript_include_tag "//ajax.googleapis.com/ajax/libs/jqueryui/1.8.9/jquery-ui.min.js" %>
-    <script type="text/javascript">
-        !$.ui && 
-          document.write(unescape("%3Cscript src='/javascripts/jquery-ui.min.js' type='text/javascript'%3E%3C/script%3E"));</script>
-  </head>
-  <body>
-    <%= yield %>
-  </body>
-</html>
+append_file ".gitignore", <<-GIT
+.DS_Store
+.bundle
+db/*.sqlite3
+log/*.log
+public/stylesheets/*.css
+tmp/**/*
+GIT
+
+# RVM
+
+# current_ruby = /=> \e\[32m(.*)\e\[m/.match(%x{rvm list})[1]
+current_ruby = "1.8.7"
+run "rvm gemset create #{app_name}"
+run "rvm #{current_ruby}@#{app_name} gem install bundler"
+run "rvm #{current_ruby}@#{app_name} -S bundle install"
+
+file ".rvmrc", <<-END
+rvm use #{current_ruby}@#{app_name}
 END
 
+run "rvm #{current_ruby}@#{app_name} -S compass init rails . -r html5-boilerplate -u html5-boilerplate --force"
+
 git :init
-git :add => ".", :commit => "-m 'initial commit'"
+git :add => "." 
+git :commit => '-m "initial commit"'
