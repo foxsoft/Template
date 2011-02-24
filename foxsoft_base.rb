@@ -58,10 +58,7 @@ create_file "log/.gitkeep"
 create_file "tmp/.gitkeep"
 
 append_file ".gitignore", <<-GIT
-.DS_Store
-.bundle
-db/*.sqlite3
-log/*.log
+config/database.yml
 public/stylesheets/*.css
 tmp/**/*
 GIT
