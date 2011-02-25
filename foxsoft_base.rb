@@ -128,3 +128,5 @@ run "rvm #{current_ruby}@#{app_name} -S compass init rails . -r html5-boilerplat
 git :init
 git :add => "." 
 git :commit => '-m "initial commit"'
+
+run "rake db:create:all"
