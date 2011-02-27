@@ -30,9 +30,8 @@ source 'http://rubygems.org'
 gem 'rails', '3.0.4'
 gem 'pg', '~> 0.10.0'
 gem 'haml', '~> 3.0.25'
-gem 'haml-rails'
 gem 'compass', '~> 0.10.6'
-gem 'html5-boilerplate', '~> 0.3.0'
+gem 'html5-boilerplate'
 gem 'barista', '~> 1.0.0'
 gem 'seed-fu', '~> 2.0.0'
 gem 'devise', '~> 1.1'
@@ -122,7 +121,10 @@ $(document).ready ->
   # code goes here
 JS
 
-run "rvm #{current_ruby}@#{app_name} -S compass init rails . -r html5-boilerplate -u html5-boilerplate --force"
+# while html5-boilerplate is using andyh git repo as source, we need to use the full path to the library in the -r command
+# forked repo path for bundler :git => "git://github.com/andyh/compass-html5-boilerplate.git"
+# run this next bit manually for now
+# run "declare -x TEMPLATE_ENGINE=\"erb\";rvm #{current_ruby}@#{app_name} -S compass init rails . -r #{`rvm #{current_ruby}@#{app_name} -S bundle show html5-boilerplate`}/lib/html5-boilerplate -u html5-boilerplate --force"
 
 git :init
 git :add => "." 
