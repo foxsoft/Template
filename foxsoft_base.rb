@@ -106,8 +106,7 @@ GIT
 
 # RVM
 
-# current_ruby = /=> \e\[32m(.*)\e\[m/.match(%x{rvm list})[1]
-current_ruby = %x{rvm list}.match(/^=> ([ruby|ree|rbx|jruby]-\d\.\d\.\d-p\d+)\s.*$/)[1]
+current_ruby = %x{rvm list}.match(/^=>\s+(.*)\s\[/)[1].strip
 run "rvm gemset create #{app_name}"
 run "rvm #{current_ruby}@#{app_name} gem install bundler"
 run "rvm #{current_ruby}@#{app_name} -S bundle install"
