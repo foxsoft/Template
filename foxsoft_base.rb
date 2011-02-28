@@ -129,11 +129,11 @@ git :add => "."
 
 puts <<-NOTES
 Now run:
-"rake jquery:install --ui"
-"rake barista:install"
-"rake db:create:all"
-"compass init rails . -r html5-boilerplate -u html5-boilerplate --force"
+rails g jquery:install --ui
+rails g barista:install
+rake db:create:all
+compass init rails . -r html5-boilerplate -u html5-boilerplate --force
 
-"git commit -m 'initial commit'"
+git commit -m 'initial commit'
 
 NOTES
