@@ -27,7 +27,7 @@ end
 run "rm Gemfile"
 file "Gemfile", <<-END
 source 'http://rubygems.org'
-gem 'rails', '3.0.4'
+gem 'rails', '3.0.5'
 gem 'pg', '~> 0.10.0'
 gem 'haml', '~> 3.0.25'
 gem 'compass', '~> 0.10.6'
@@ -114,8 +114,6 @@ file ".rvmrc", <<-END
 rvm use #{current_ruby}@#{app_name}
 END
 
-generate("jquery:install --ui")
-generate("barista:install")
 file "app/coffeescripts/application.coffee", <<-JS
 $(document).ready ->
   # code goes here
@@ -127,7 +125,15 @@ JS
 # run "declare -x TEMPLATE_ENGINE=\"erb\";rvm #{current_ruby}@#{app_name} -S compass init rails . -r #{`rvm #{current_ruby}@#{app_name} -S bundle show html5-boilerplate`}/lib/html5-boilerplate -u html5-boilerplate --force"
 
 git :init
-git :add => "." 
-git :commit => '-m "initial commit"'
+git :add => "."
 
-run "rake db:create:all"
+puts <<-NOTES
+Now run:
+"rake jquery:install --ui"
+"rake barista:install"
+"rake db:create:all"
+"compass init rails . -r html5-boilerplate -u html5-boilerplate --force"
+
+"git commit -m 'initial commit'"
+
+NOTES
