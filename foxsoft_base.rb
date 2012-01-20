@@ -5,19 +5,22 @@ file "config/database.yml", <<-END
 development:
   adapter: postgresql
   database: #{app_name}-dev
+  username: deploy
 test:
   adapter: postgresql
   database: #{app_name}-test
+  username: deploy
 production:
   adapter: postgresql
   database: #{app_name}
+  username: deploy
 END
-run "cp config/database.yml config/database.yml.example"
 
 if cap_install = yes?("Using Capistrano? (yes/no)")
   cap_gem =<<-CAP
   group :development do
     gem 'capistrano'
+    gem 'capistrano-ext'
   end
   CAP
 else
@@ -27,18 +30,31 @@ end
 run "rm Gemfile"
 file "Gemfile", <<-END
 source 'http://rubygems.org'
-gem 'rails', '3.0.5'
-gem 'pg', '~> 0.10.0'
-gem 'haml', '~> 3.0.25'
-gem 'compass', '~> 0.10.6'
-gem 'html5-boilerplate'
-gem 'barista', '~> 1.0.0'
-gem 'seed-fu', '~> 2.0.0'
-gem 'devise', '~> 1.1'
-gem 'cancan', '~> 1.5.0'
-gem 'jquery-rails', '>= 0.2.6'
+gem 'rails', '3.1.3'
+gem 'pg', '~> 0.12.2'
+gem 'bcrypt-ruby', '~> 3.0.0'
+gem 'haml', '~> 3.1.4'
+gem 'seed-fu', '~> 2.1.0'
+gem 'head_start', '~> 0.1.7'
+gem 'simple_form'
+gem 'jquery-rails'
+
+# gem 'state_machine',
+# gem 'cancan', '~> 1.6.7'
+# gem 'kaminari'
+# gem 'carrierwave'
+# gem 'cloudfiles'
+# gem 'rmagick'
+# gem 'RedCloth'
+# gem 'fancybox-rails'
 
 #{cap_gem}
+
+group :assets do
+  gem 'sass-rails',   '~> 3.1.5'
+  gem 'coffee-rails', '~> 3.1.1'
+  gem 'uglifier', '>= 1.0.3'
+end
 
 group :test do
   gem 'shoulda'
@@ -60,7 +76,7 @@ CAP
 file "config/deploy.rb", <<-DEPLOY
 require "bundler/capistrano"
 set :application, "#{app_name}"
-set :repository,  "set your repository location here"
+set :repository,  "git@github.com:foxsoft/#{app_name}.git"
 
 set :scm, :git
 
@@ -93,14 +109,15 @@ END
 run "rm public/index.html"
 run "rm app/views/layouts/application.html.erb"
 
-create_file "log/.gitkeep"
 create_file "tmp/.gitkeep"
 
 append_file ".gitignore", <<-GIT
-config/database.yml
-public/stylesheets/*.css
-public/javascripts/application.js
-tmp/**/*
+tmp/restart.txt
+*.tmproj
+public/uploads
+public/assets
+.DS_Store
+.sass-cache/
 GIT
 
 # RVM
@@ -114,26 +131,14 @@ file ".rvmrc", <<-END
 rvm use #{current_ruby}@#{app_name}
 END
 
-file "app/coffeescripts/application.coffee", <<-JS
-$(document).ready ->
-  # code goes here
-JS
-
-# while html5-boilerplate is using andyh git repo as source, we need to use the full path to the library in the -r command
-# forked repo path for bundler :git => "git://github.com/andyh/compass-html5-boilerplate.git"
-# run this next bit manually for now
-# run "declare -x TEMPLATE_ENGINE=\"erb\";rvm #{current_ruby}@#{app_name} -S compass init rails . -r #{`rvm #{current_ruby}@#{app_name} -S bundle show html5-boilerplate`}/lib/html5-boilerplate -u html5-boilerplate --force"
-
 git :init
-git :add => "."
 
 puts <<-NOTES
 Now run:
-rails g jquery:install --ui
-rails g barista:install
 rake db:create:all
-compass init rails . -r html5-boilerplate -u html5-boilerplate --force
+bundle exec compass init rails -r head_start -u head_start/boilerplate --force
 
+git add .
 git commit -m 'initial commit'
 
 NOTES
